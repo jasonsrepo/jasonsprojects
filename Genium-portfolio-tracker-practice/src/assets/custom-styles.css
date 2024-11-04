@@ -1,0 +1,59 @@
+:root {
+    /* Convert HSL to hex/rgb for easier use in Dash */
+    --white: #FFFFFF;
+    --black: #000000;
+    --safe-light-accent: #00FFB3;
+    --safe-dark-accent: #000000;
+    --light-accent: #B3FFE6;
+    --dark-accent: #244D40;
+    --accent: #00FFB3;
+}
+
+body {
+    background-color: var(--dark-accent);
+    color: var(--white);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    letter-spacing: 0.05em;
+    line-height: 1.4em;
+    font-size: 17px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bitter', serif;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0.02em;
+    line-height: 1.25em;
+}
+
+.card {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--safe-light-accent);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--safe-light-accent);
+    font-family: 'Bitter', serif;
+}
+
+.table {
+    color: var(--white);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 255, 179, 0.1);
+    color: var(--light-accent);
+}
+
+/* Custom classes for interactive elements */
+.interactive-text {
+    color: var(--safe-light-accent);
+    transition: color 0.3s ease;
+}
+
+.interactive-text:hover {
+    color: var(--light-accent);
+}
