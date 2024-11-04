@@ -1,9 +1,8 @@
 import dash
-from dash import html, dcc, callback, Input, Output
+from dash import html
 import dash_bootstrap_components as dbc
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+from components.dashboard_components import DashboardComponents
+from data.portfolio_data import PortfolioData
 
 # Initialize the Dash app
 app = dash.Dash(__name__, 
@@ -15,22 +14,7 @@ app = dash.Dash(__name__,
                           'content': 'width=device-width, initial-scale=1.0'}]
                 )
 
-# Sample data
-sample_portfolio = pd.DataFrame({
-    'Security': ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'],
-    'Quantity': [100, 50, 75, 25, 150],
-    'Current_Price': [180.5, 2750.2, 335.8, 3300.5, 850.2],
-    'Purchase_Price': [150.2, 2500.5, 300.2, 3000.8, 700.5],
-    'Sector': ['Technology', 'Technology', 'Technology', 'Consumer', 'Automotive']
-})
-
-# Calculate portfolio metrics
-sample_portfolio['Market_Value'] = sample_portfolio['Quantity'] * sample_portfolio['Current_Price']
-sample_portfolio['Cost_Basis'] = sample_portfolio['Quantity'] * sample_portfolio['Purchase_Price']
-sample_portfolio['Gain_Loss'] = sample_portfolio['Market_Value'] - sample_portfolio['Cost_Basis']
-sample_portfolio['Return'] = (sample_portfolio['Gain_Loss'] / sample_portfolio['Cost_Basis'] * 100).round(2)
-
-# Corrected chart theme
+# Chart theme settings
 chart_theme = {
     'paper_bgcolor': 'rgba(0,0,0,0)',
     'plot_bgcolor': 'rgba(0,0,0,0)',
@@ -48,116 +32,23 @@ chart_theme = {
     }
 }
 
-# Create the layout
+# Initialize components
+portfolio_data = PortfolioData()
+dashboard_components = DashboardComponents(chart_theme)
+
+# Create layout
 app.layout = dbc.Container([
     # Header
-    dbc.Row([
-        dbc.Col([
-            html.H1("Portfolio Analytics Dashboard", 
-                   className="text-center mb-4 mt-4",
-                   style={'color': '#00FFB3'})
-        ])
-    ]),
+    dashboard_components.create_header(),
     
     # Portfolio Summary Cards
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Total Value", className="card-title text-center", style={'color': '#00FFB3'}),
-                    html.H2(f"${sample_portfolio['Market_Value'].sum():,.2f}", 
-                           className="text-center",
-                           style={'color': '#FFFFFF'})
-                ])
-            ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ], width=4),
-        
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Total Gain/Loss", className="card-title text-center", style={'color': '#00FFB3'}),
-                    html.H2(f"${sample_portfolio['Gain_Loss'].sum():,.2f}",
-                           className="text-center",
-                           style={'color': '#FFFFFF'})
-                ])
-            ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ], width=4),
-        
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Overall Return", className="card-title text-center", style={'color': '#00FFB3'}),
-                    html.H2(f"{(sample_portfolio['Gain_Loss'].sum() / sample_portfolio['Cost_Basis'].sum() * 100):,.2f}%",
-                           className="text-center",
-                           style={'color': '#FFFFFF'})
-                ])
-            ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ], width=4)
-    ]),
+    dashboard_components.create_summary_cards(portfolio_data.get_portfolio_summary()),
     
     # Charts Row
-    dbc.Row([
-        # Portfolio Composition
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Portfolio Composition",
-                              style={'backgroundColor': 'rgba(0,0,0,0)', 'border-bottom': '1px solid #FFFFFF', 'color': '#00FFB3'}),
-                dbc.CardBody([
-                    dcc.Graph(
-                        figure=px.pie(sample_portfolio, 
-                                    values='Market_Value', 
-                                    names='Security',
-                                    title='Holdings Distribution',
-                                    template="plotly_dark",
-                                    color_discrete_sequence=px.colors.sequential.Viridis)
-                        .update_layout(**chart_theme)
-                    )
-                ])
-            ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ], width=6),
-        
-        # Performance by Sector
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Sector Performance",
-                              style={'backgroundColor': 'rgba(0,0,0,0)', 'border-bottom': '1px solid #FFFFFF', 'color': '#00FFB3'}),
-                dbc.CardBody([
-                    dcc.Graph(
-                        figure=px.bar(sample_portfolio.groupby('Sector')['Return'].mean().reset_index(),
-                                    x='Sector',
-                                    y='Return',
-                                    title='Average Return by Sector',
-                                    template="plotly_dark",
-                                    color_discrete_sequence=px.colors.sequential.Viridis)
-                        .update_layout(**chart_theme)
-                    )
-                ])
-            ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ], width=6)
-    ]),
+    dashboard_components.create_charts_row(portfolio_data.get_portfolio_df()),
     
     # Holdings Table
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Portfolio Holdings",
-                              style={'backgroundColor': 'rgba(0,0,0,0)', 'border-bottom': '1px solid #FFFFFF', 'color': '#00FFB3'}),
-                dbc.CardBody([
-                    html.Div([
-                        dbc.Table.from_dataframe(
-                            sample_portfolio[['Security', 'Quantity', 'Current_Price', 
-                                           'Market_Value', 'Return']].round(2),
-                            striped=True,
-                            bordered=True,
-                            hover=True,
-                            dark=True,
-                            style={'color': '#FFFFFF'}
-                        )
-                    ])
-                ])
-            ], style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
-        ])
-    ])
+    dashboard_components.create_holdings_table(portfolio_data.get_portfolio_df())
     
 ], fluid=True, style={'backgroundColor': '#16282d', 'minHeight': '100vh', 'color': '#FFFFFF'})
 
