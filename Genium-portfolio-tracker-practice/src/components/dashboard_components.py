@@ -170,7 +170,7 @@ class DashboardComponents:
                             )
                         ])
                     ])
-                ], style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
+                ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
             ], width=12)
         ])
     
@@ -185,3 +185,44 @@ class DashboardComponents:
                     color_discrete_sequence=px.colors.sequential.Bluyl)
         fig.update_layout(**self.chart_theme)
         return fig
+
+    def create_strategy_section(self, available_strategies):
+        """Create strategy selection and analysis section"""
+        return dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader("Strategy Analysis",
+                                 style={'backgroundColor': 'rgba(0,0,0,0)', 
+                                      'border-bottom': '1px solid #FFFFFF', 
+                                      'color': '#00FFB3'}),
+                    dbc.CardBody([
+                        html.Div([
+                            html.H5("Select Strategy", style={'color': '#00FFB3'}),
+                            dcc.Dropdown(
+                                id='strategy-selector',
+                                options=[
+                                    {'label': details['name'], 'value': strategy_id}
+                                    for strategy_id, details in available_strategies.items()
+                                ],
+                                value='momentum',
+                                style={'color': 'black', 'marginBottom': '20px'}
+                            ),
+                            html.Div(id='strategy-description', style={'marginBottom': '20px'}),
+                            html.Div(id='strategy-results')
+                        ])
+                    ])
+                ], className="mb-4", style={'backgroundColor': 'rgba(0,0,0,0)', 'border': '1px solid #FFFFFF'})
+            ], width=12)
+        ])
+
+    def create_strategy_results(self, results):
+        """Create strategy results display"""
+        return html.Div([
+            html.H5("Analysis Results", style={'color': '#00FFB3', 'marginBottom': '15px'}),
+            html.P(results['summary'], style={'color': '#FFFFFF'}),
+            html.H6("Recommendations:", style={'color': '#00FFB3', 'marginTop': '15px'}),
+            html.Div([
+                html.P(rec, style={'color': '#FFFFFF', 'marginBottom': '5px'})
+                for rec in results['recommendations']
+            ])
+        ])
