@@ -39,7 +39,6 @@ project/
 ├── analytics/          # Financial analysis modules
 ├── components/         # Dashboard components
 ├── assets/            # Static files (CSS, images)
-├── config.py          # Configuration settings
 ├── app.py             # Main application
 └── requirements.txt   # Project dependencies
 ```
@@ -50,6 +49,3 @@ project/
 - Pandas
 - Plotly
 - NumPy
-
-## License
-MIT
